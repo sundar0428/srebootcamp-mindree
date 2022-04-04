@@ -28,11 +28,11 @@ docker run nginx --name=web
 
 #2e Create the GCR image to be pushed to GCP
 
-  docker tag my-web-server:1.0 gcr.io/[PROJECT_ID]/my-web-server:v1
+  docker tag my-web-server:1.0 eu.gcr.io/[PROJECT_ID]/my-web-server:v1
 
 #2f Push the image my-web-server to GCP
 
-  docker push gcr.io/[PROJECT_ID]/my-web-server:v1
+  docker push eu.gcr.io/[PROJECT_ID]/my-web-server:v1
 
   # Confirm the operation by Navigating to Container Registry Images in GCP Console
 

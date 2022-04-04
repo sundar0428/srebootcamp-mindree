@@ -1,0 +1,42 @@
+#4a Shell script to create GKE cluster called my-cluster with 2 nodes. Get the cluster name as an argument to the script
+
+    git clone https://github.com/sundar0428/srebootcamp-mindree.git
+    cd srebootcamp-mindtree
+    chmod 744 gke_my-cluster_creation.sh
+    ./gke_my-cluster_creation.sh 
+    # Verify for GKE cluster created in Console
+
+#4b & 4c Create a deployment my-web-server with 2 min and 5 max replicas using the image my-web-server & Setup HPA to scale up if CPU goes beyond 50%
+
+    gcloud container clusters get-credentials my-cluster --zone=europe-west2-a
+    kubectl create deployment my-web-server --image=eu.gcr.io/[PROJECT_ID]/my-web-server --replicas=3 --dry-run=client -o yaml > my-web-server-deployment.yaml
+    kubectl apply -f my-web-server-deployment.yaml
+    kubectl autoscale deployment/my-web-server --min=3 --max=5 --cpu-percent=50 # https://kubernetes.io/blog/2016/07/autoscaling-in-kubernetes/
+    
+#4d Expose a service(load balancer) to make your nginx server accessible on internet
+
+    kubectl expose deployment my-web-server --port=80 --target-port=8080 --name=my-web-service --type=LoadBalancer --dry-run=client -o yaml > my-web-service.yaml
+    kubectl apply -f my-web-service.yaml
+    kubectl describe svc my-web-service 
+    kubectl get service my-web-service -o yaml #After you create the Service, you can use kubectl get service -o yaml to view its specification and see the stable external IP address
+
+#4e Setup alerts to send an email to your email id if autoscaling kicks in
+
+#4f Find a way to put load on the nginx server and validate auto-scaling kicking-in
+
+    # We will use a Tool called "Hey" to generate requests
+    #Go to Cloud Shell and execute the below command
+    go get -u github.com/sundar0428/hey
+    #Get the External IP of the Service by executing the below command
+    kubectl get svc my-web-service
+    #Run Hey tool against the service
+    hey http://<External-IP>
+    #Increase the load by executing the below command
+    hey -z 2m -c 25 http://<External-IP> #Continually send requests for 2 minutes for 25 concurrent requests
+    #Confirm the autoscaling works
+
+#4g Shell Script to delete GKE cluster. Ask for user confirmation
+
+    chmod 744 gke_my-cluster_deletion.sh
+    ./gke_my-cluster_deletion.sh
+    # Verify for GCE instance created in Console
