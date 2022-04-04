@@ -2,6 +2,10 @@
 
 #Shell script to create a compute instance called sre-terminal with Centos Image 
 
+# Ask the compute instance name
+
+echo "Hello, What do you want to name your compute engine instace"
+
 read instance_name
 
 echo "You are creating $instance_name with centos image"
