@@ -1,0 +1,10 @@
+# Shell script to create a compute engie instance called sre-terminal with centos image
+
+        git clone https://github.com/sundar0428/srebootcamp-mindree.git
+        cd srebootcamp-mindtree
+        chmod 744 gce_sre-terminal_creation.sh
+        ./gce_sre-terminal_creation.sh
+        # Verify for GCE instance created in Console
+
+
+# Shell script to delete sre-terminal compute instance 
