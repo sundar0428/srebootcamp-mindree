@@ -1,2 +1,2 @@
 # srebootcamp-mindree
-This repo is to learn Google Cloud and creating resources
+This repo is to begin SRE bootcamp project
