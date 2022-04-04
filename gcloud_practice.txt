@@ -1,0 +1,19 @@
+#Get projects, regions, zones, machine_types
+
+  gcloud projects list
+  gcloud compute zones list #Viewing a list of available zones
+  gcloud compute regions list #Viewing a list of available regions
+  gcloud compute regions describe europe-west1 #Viewing information about a region
+  gcloud compute machine-types list #To list all machine types in a project in table form
+  gcloud compute machine-types list --filter="zone:( us-central1-b europe-west1-d )" #To list all machine types in the us-central1-b and europe-west1-d zones
+
+#Try various formatting options
+
+  gcloud projects list --format="json" 
+  gcloud projects list --format="csv(projectId, name, labels)"
+  gcloud projects list --format="csv(projectId, name, labels.app-name, labels.biz-unit,labels.env-name, labels.owner)"
+
+#Filter the results using --filter flag
+
+  gcloud projects list --format="json" --filter="labels.env=test AND labels.version=alpha"
+  gcloud projects list --format="table(projectNumber,projectId,createTime)" --filter="createTime.date('%Y-%m-%d', Z)='2022-04-04'"
