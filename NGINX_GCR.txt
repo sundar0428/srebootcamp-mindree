@@ -1,0 +1,40 @@
+#2a Run the nginx web server using docker
+
+docker run nginx --name=web
+
+#2b Run the nginx web server in the background as daemon
+
+   docker run --name web -dt nginx
+
+  #Check the container with the below command
+
+   docker container ls
+   docker images
+
+#2c Create your index.html and copy it in the docker container path to replace the default index.html
+
+   mkdir -p docker-nginx/html
+   cd docker-nginx/html
+   echo "This is my index.html from host machine with hostname - $(hostname)" > index.html
+   docker run -d  -p 80:80 -v ~/docker-nginx/html:/usr/share/nginx/html --hostname web nginx # -d for detachment(or daemon mode) , -p for port forwarding -v for volume mounting , usr/share/nginx/html index.html exists by default in this location
+
+#2d Build a new image my-web-server with the container with the base image and your html 
+
+  git clone https://github.com/sundar0428/Dockerlearning.git
+  cd Dockerlearning
+  docker build -t my-web-server:1.0 .
+  docker images #Check for the image my-web-server
+  docker run -d -p 80:80 my-web-server:1.0
+
+#2e Create the GCR image to be pushed to GCP
+
+  docker tag my-web-server:1.0 gcr.io/[PROJECT_ID]/my-web-server:v1
+
+#2f Push the image my-web-server to GCP
+
+  docker push gcr.io/[PROJECT_ID]/my-web-server:v1
+
+  # Confirm the operation by Navigating to Container Registry Images in GCP Console
+
+  # Confirm the existence of my-web-server with version as 1.0
+
