@@ -1,7 +1,7 @@
 #4a Shell script to create GKE cluster called my-cluster with 2 nodes. Get the cluster name as an argument to the script
 
     git clone https://github.com/sundar0428/srebootcamp-mindree.git
-    cd srebootcamp-mindtree
+    cd srebootcamp-mindtree/scripts
     chmod 744 gke_my-cluster_creation.sh
     ./gke_my-cluster_creation.sh 
     # Verify for GKE cluster created in Console
