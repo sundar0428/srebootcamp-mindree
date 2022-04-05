@@ -1,0 +1,1 @@
+#machinetype   = "g1-small"
