@@ -24,7 +24,7 @@ docker run nginx --name=web
   cd Dockerlearning
   docker build -t my-web-server:1.0 .
   docker images #Check for the image my-web-server
-  docker run -d -p 80:80 my-web-server:1.0
+  docker run -d -p 8080:80 my-web-server:1.0
 
 #2e Create the GCR image to be pushed to GCP
 
