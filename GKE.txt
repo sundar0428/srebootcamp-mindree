@@ -9,7 +9,7 @@
 #4b & 4c Create a deployment my-web-server with 2 min and 5 max replicas using the image my-web-server & Setup HPA to scale up if CPU goes beyond 50%
 
     gcloud container clusters get-credentials my-cluster --zone=europe-west2-a
-    kubectl create deployment my-web-server --image=eu.gcr.io/[PROJECT_ID]/my-web-server --replicas=3 --dry-run=client -o yaml > my-web-server-deployment.yaml
+    kubectl create deployment my-web-server --image=eu.gcr.io/[PROJECT_ID]/my-web-server:v1 --replicas=3 --dry-run=client -o yaml > my-web-server-deployment.yaml
     kubectl apply -f my-web-server-deployment.yaml
     kubectl autoscale deployment/my-web-server --min=3 --max=5 --cpu-percent=50 # https://kubernetes.io/blog/2016/07/autoscaling-in-kubernetes/
     
