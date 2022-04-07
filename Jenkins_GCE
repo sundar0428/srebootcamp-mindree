@@ -1,0 +1,68 @@
+# 11a Host a Jenkins instance in a Compute Engine Instance in GCP
+
+# Reference : https://cloud.google.com/architecture/using-jenkins-for-distributed-builds-on-compute-engine
+# Reference : https://medium.com/bb-tutorials-and-thoughts/how-to-run-jenkins-on-gcp-vm-29dc18490fae#id_token=eyJhbGciOiJSUzI1NiIsImtpZCI6ImNlYzEzZGViZjRiOTY0Nzk2ODM3MzYyMDUwODI0NjZjMTQ3OTdiZDAiLCJ0eXAiOiJKV1QifQ.eyJpc3MiOiJodHRwczovL2FjY291bnRzLmdvb2dsZS5jb20iLCJuYmYiOjE2NDkzMjUwNzMsImF1ZCI6IjIxNjI5NjAzNTgzNC1rMWs2cWUwNjBzMnRwMmEyamFtNGxqZGNtczAwc3R0Zy5hcHBzLmdvb2dsZXVzZXJjb250ZW50LmNvbSIsInN1YiI6IjEwODAxMjE4Mzk2NTk4Mzc1MTY1MiIsImVtYWlsIjoic3VuZGFyMDQyOEBnbWFpbC5jb20iLCJlbWFpbF92ZXJpZmllZCI6dHJ1ZSwiYXpwIjoiMjE2Mjk2MDM1ODM0LWsxazZxZTA2MHMydHAyYTJqYW00bGpkY21zMDBzdHRnLmFwcHMuZ29vZ2xldXNlcmNvbnRlbnQuY29tIiwibmFtZSI6IlNyaW5pdmFzYSBTdW5kYXIiLCJwaWN0dXJlIjoiaHR0cHM6Ly9saDMuZ29vZ2xldXNlcmNvbnRlbnQuY29tL2EtL0FPaDE0R2lrZ3NCenpEdk5hQmVXcGF5bmlOQUtJV04xY3FlY3paYTFTNVcwPXM5Ni1jIiwiZ2l2ZW5fbmFtZSI6IlNyaW5pdmFzYSIsImZhbWlseV9uYW1lIjoiU3VuZGFyIiwiaWF0IjoxNjQ5MzI1MzczLCJleHAiOjE2NDkzMjg5NzMsImp0aSI6IjdhYjViYzY0YzZjMThkYzQxODQyZjlhOGVhMjcwNGMyNGI4YWY2ODcifQ.U03MYMpukcSZGJkRBSG2yO-KxC2kyoHZAyCxwnJUO-pdZqWu_FrT5Wd4DoWWnYWIfpC_nTCyDHJVBT4SeEsA-H5Q5pm5ln_Ll7cO8QCYhNs2VULvEj4WnJWs7r6wD1VS4m2r6KAOFHvrSLlOG9TPX2MYe_hEzJCH_ZxBmT33V_pidkZgcpNu0xXYfp8dbXSJKmROryMbnWUoB-K8fHqXp9rlK4LpURBBArdsHiQhCPnETRku3DhO99ykeIdq31Ft86pqJyrwKy3Wzj7TjIddaJiPsYYIp-I6goGj_jmrIezsOlo_AjiS_eeiOzc5SsSTtH_hTM4Hy-w1wdMxLtT_cQ
+
+
+
+
+# Step 1: Create Service Account ; Grant required access and download SA key
+
+# Create an Identity and Access Management (IAM) service account to delegate permissions to Jenkins. This account enables Jenkins to store data in Cloud Storage and launch instances in Compute Engine. Jenkins runs your builds in ephemeral instances and stores build artifacts in Cloud Storage.
+
+        gcloud iam service-accounts create jenkins --display-name jenkins
+
+# Store the service account email address and your current Google Cloud project ID in environment variables for use in later commands
+
+        export SA_EMAIL=$(gcloud iam service-accounts list --filter="displayName:jenkins" --format='value(email)')
+        export PROJECT=$(gcloud info --format='value(config.project)')
+
+# Bind the following roles to your service account:
+
+        gcloud projects add-iam-policy-binding $PROJECT --role roles/storage.admin --member serviceAccount:$SA_EMAIL
+        gcloud projects add-iam-policy-binding $PROJECT --role roles/compute.instanceAdmin.v1 --member serviceAccount:$SA_EMAIL
+        gcloud projects add-iam-policy-binding $PROJECT --role roles/compute.networkAdmin --member serviceAccount:$SA_EMAIL
+        gcloud projects add-iam-policy-binding $PROJECT --role roles/compute.securityAdmin --member serviceAccount:$SA_EMAIL
+        gcloud projects add-iam-policy-binding $PROJECT --role roles/iam.serviceAccountActor --member serviceAccount:$SA_EMAIL
+
+# Download the service account key
+
+        gcloud iam service-accounts keys create jenkins-sa.json --iam-account $SA_EMAIL
+
+# Step 2: Create the VM using the below command
+
+
+        gcloud compute instances create jenkins-vm --project=mindtree-training-sundar --zone=europe-west2-a --machine-type=f1-micro --network-interface=network-tier=PREMIUM,subnet=default --maintenance-policy=MIGRATE --service-account=271738677308-compute@developer.gserviceaccount.com --scopes=https://www.googleapis.com/auth/devstorage.read_only,https://www.googleapis.com/auth/logging.write,https://www.googleapis.com/auth/monitoring.write,https://www.googleapis.com/auth/servicecontrol,https://www.googleapis.com/auth/service.management.readonly,https://www.googleapis.com/auth/trace.append --tags=http-server,https-server --create-disk=auto-delete=yes,boot=yes,device-name=jenkins-vm,image=projects/centos-cloud/global/images/centos-7-v20220406,mode=rw,size=20,type=projects/mindtree-training-sundar/zones/europe-west2-a/diskTypes/pd-balanced --no-shielded-secure-boot --shielded-vtpm --shielded-integrity-monitoring --reservation-affinity=any
+
+# Startup Script
+
+        yum install -y wget
+        // then follow these commands
+        sudo wget -O /etc/yum.repos.d/jenkins.repo \
+            https://pkg.jenkins.io/redhat/jenkins.repo
+        sudo rpm --import https://pkg.jenkins.io/redhat/jenkins.io.key
+        sudo yum upgrade
+        sudo yum install epel-release java-11-openjdk-devel
+        sudo yum install jenkins
+        sudo systemctl daemon-reload
+
+# Start the Jenkins with the following command.
+
+        sudo systemctl start jenkins
+
+# Check the status of the Jenkins with the following commands
+
+        systemctl status jenkins
+
+# When you install Jenkins and start, it uses port 8080 by default. You can check it with the following commands.
+        netstat -ntlp
+        systemctl status jenkins
+        ps -ef | grep jenkins
+
+# If you take the public DNS of the VM instance and hit it with the port 8080 you won’t see anything on the browser since the ports are not open.Add the firewall rule to the default network
+
+# Setup Jenkins - Unlock Jenkins by taking the password from this location /var/lib/jenkins/secrets/initialAdminPassword. If you are already logged in through SSH you can get it from the above path.
+
+
+
+

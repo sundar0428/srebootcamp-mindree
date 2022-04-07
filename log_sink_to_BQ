@@ -1,0 +1,46 @@
+# 5a and 5b Review Stackdriver logs for sre-terminal and my-cluster ; Create a sink to route the sre-terminal and my-cluster logs to BQ
+
+#Source: https://cloud.google.com/logging/docs/export/configure_export_v2
+
+Step 1 : Create a Dataset in the Bigquery. Create a dataset with unique name (For example gcp_logging_export)
+
+Step 2: Open Cloud Shell 
+
+Step 3: Execute the below command in the Cloud Shell
+
+        gcloud projects get-iam-policy $DEVSHELL_PROJECT_ID > /tmp/policy.yaml
+
+Step 4: Add the Data Access Audit logs Configuration below to your /tmp/policy.yaml
+
+    "auditConfigs": [
+      {
+        "service": "allServices",
+        "auditLogConfigs": [
+          { "logType": "ADMIN_READ" },
+          { "logType": "DATA_READ"  },
+          { "logType": "DATA_WRITE" },
+        ]
+      },
+    ]
+
+Step 5: Execute the below command in the Cloud Shell
+
+        gcloud projects set-iam-policy $DEVSHELL_PROJECT_ID /tmp/policy.yaml
+
+Step 6: Create the sink with the below command
+
+        gcloud logging sinks create gcp-logging-sink-bq bigquery.googleapis.com/projects/$DEVSHELL_PROJECT_ID/datasets/google_export_logging --log-filter='logName:"projects/$DEVSHELL/logs/cloudaudit.googleapis.com"' --description="My first sink"
+
+Sample Output below:
+
+veenasundar2012@cloudshell:~ (mindtree-training-sundar)$ gcloud logging sinks create gcp-logging-sink-bq bigquery.googleapis.com/projects/$DEVSHELL_PROJECT_ID/datasets/gcp_logging_export --log-filter='logName:"projects/$DEVSHELL/logs/cloudaudit.googleapis.com"' --description="My first sink"
+Created [https://logging.googleapis.com/v2/projects/mindtree-training-sundar/sinks/gcp-logging-sink-bq].
+Please remember to grant `serviceAccount:p271738677308-096419@gcp-sa-logging.iam.gserviceaccount.com` the BigQuery Data Editor role on the dataset.
+More information about sinks can be found at https://cloud.google.com/logging/docs/export/configure_export
+veenasundar2012@cloudshell:~ (mindtree-training-sundar)$
+
+Step 7: Please remember to grant `serviceAccount:p271738677308-096419@gcp-sa-logging.iam.gserviceaccount.com` the BigQuery Data Editor role on the dataset.
+
+    Go to BigQuery and Open the DataSet gcp_logging_export. Click Share the permissions and give "BigQuery Data Editor" permission to p271738677308-096419@gcp-sa-logging.iam.gserviceaccount.com.
+
+Step 8: Verify the logs are getting routed to the BQ dataset gcp_logging_export after some time.
